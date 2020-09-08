@@ -1,5 +1,7 @@
 # cal/views.py
-
+from django.shortcuts import render, redirect
+from calendarapp.forms import EventForm, AddMemberForm
+from calendarapp.models import EventMember
 from datetime import datetime, date
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, HttpResponseRedirect
@@ -15,7 +17,7 @@ from django.urls import reverse_lazy
 
 from .models import *
 from .utils import Calendar
-from .forms import EventForm, AddMemberForm
+from .forms import EventForm, EventForm
 
 @login_required(login_url='signup')
 def index(request):
@@ -81,36 +83,101 @@ class EventEdit(generic.UpdateView):
 @login_required(login_url='signup')
 def event_details(request, event_id):
     event = Event.objects.get(id=event_id)
-    eventmember = EventMember.objects.filter(event=event)
+#    eventmember = EventMember.objects.filter(event=event)'
     context = {
         'event': event,
-        'eventmember': eventmember
+  #     'eventmember': eventmember
     }
     return render(request, 'event-details.html', context)
 
 
-def add_eventmember(request, event_id):
+def addnew(request, event_id):
     forms = AddMemberForm()
     if request.method == 'POST':
-        forms = AddMemberForm(request.POST)
-        if forms.is_valid():
-            member = EventMember.objects.filter(event=event_id)
-            event = Event.objects.get(id=event_id)
-            if member.count() <= 9:
-                user = forms.cleaned_data['user']
-                EventMember.objects.create(
-                    event=event,
-                    user=user
-                )
-                return redirect('calendarapp:calendar')
-            else:
-                print('--------------User limit exceed!-----------------')
-    context = {
-        'form': forms
-    }
-    return render(request, 'add_member.html', context)
+         forms = AddMemberForm(request.POST)
+         if forms.is_valid():
+             member = EventMember.objects.filter(event=event_id)
+             event = Event.objects.get(id=event_id)
+             if member.count() <= 9:
+                 user = forms.cleaned_data['user']
+                 EventMember.objects.create(
+                     event=event,
+                     user=user
+                 )
+                 return redirect('calendarapp:calendar')
+             else:
+                 print('--------------User limit exceed!-----------------')
+     context = {
+         'form': forms
+     }
+     return render(request, 'add_member.html', context)
 
-class EventMemberDeleteView(generic.DeleteView):
-    model = EventMember
-    template_name = 'event_delete.html'
-    success_url = reverse_lazy('calendarapp:calendar')
+# def addnew(request, event_id):
+#     forms = AddMemberForm()
+#     if request.method == "POST":
+#         form = AddMemberForm(request.POST)
+#         if form.is_valid():
+#             member = EventMember.objects.filter(event=event_id)
+#             event = Event.objects.get(id=event_id)
+#             try:
+#                 form.save()
+#                 return redirect('/')
+#             except:
+#                 pass
+#     else:
+#         form = EventForm()
+#     return render(request, 'index.html', {'form': form})
+
+
+def index(request):
+    eventmembers = EventMember.objects.all()
+    return render(request, "show.html", {'eventmembers': eventmembers})
+
+
+def edit(request, id):
+    eventmember = EventMember.objects.get(id=id)
+    return render(request, 'edit.html', {'eventmember': eventmember})
+
+
+def update(request, id):
+    eventmember = EventMember.objects.get(id=id)
+    form = EventForm(request.POST, instance=eventmember)
+    if form.is_valid():
+        form.save()
+        return redirect("/")
+    return render(request, 'edit.html', {'eventmember': eventmember})
+
+
+def destroy(request, id):
+    eventmember = EventMember.objects.get(id=id)
+    eventmember.delete()
+    return redirect("/")
+
+
+
+
+# #def add_eventmember(request, event_id):
+#     forms = MemberForm()
+#     if request.method == 'POST':
+#         forms = MemberForm(request.POST)
+#         if forms.is_valid():
+#             member = EventMember.objects.filter(event=event_id)
+#             event = Event.objects.get(id=event_id)
+#             if member.count() <= 9:
+#                 user = forms.cleaned_data['user']
+#                 EventMember.objects.create(
+#                     event=event,
+#                     user=user
+#                 )
+#                 return redirect('calendarapp:calendar')
+#             else:
+#                 print('--------------User limit exceed!-----------------')
+#     context = {
+#         'form': forms
+#     }
+#     return render(request, 'add_member.html',' context)
+#
+# class EventMemberDeleteView(generic.DeleteView):
+#     model = EventMember
+#     template_name = 'event_delete.html'
+#     success_url = reverse_lazy('calendarapp:calendar')

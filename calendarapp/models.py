@@ -22,12 +22,9 @@ class Event(models.Model):
         return f'<a href="{url}"> {self.title} </a>'
 
 
+
 class EventMember(models.Model):
-    event = models.ForeignKey(Event, on_delete=models.CASCADE)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    name = models.CharField(max_length=100, default='')
 
     class Meta:
-        unique_together = ['event', 'user']
-
-    def __str__(self):
-        return str(self.user)
+        db_table = "eventember"

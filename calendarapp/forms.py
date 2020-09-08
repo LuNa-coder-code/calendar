@@ -26,7 +26,9 @@ class SignupForm(forms.Form):
 
 class AddMemberForm(forms.ModelForm):
   class Meta:
-    model = EventMember
-    fields = ['user']
+      model = EventMember
+      fields = ['name']  # https://docs.djangoproject.com/en/3.0/ref/forms/widgets/
+      widgets = {'name': forms.TextInput(attrs={'class': 'form-control'}),
+                 }
 
 
