@@ -28,3 +28,5 @@ class AddMemberForm(forms.ModelForm):
   class Meta:
     model = EventMember
     fields = ['user']
+
+
